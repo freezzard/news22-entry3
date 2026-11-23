@@ -4,6 +4,7 @@
 // every check passes; prints one verdict line per check otherwise.
 
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { createHash } from "node:crypto";
 import { inflateSync } from "node:zlib";
 
@@ -173,7 +174,8 @@ function verdictLine(passed: boolean): string {
 }
 
 function main(): number {
-  const pngOctets = readFileSync("entry.png");
+  const scriptDir = dirname(process.argv[1]);
+  const pngOctets = readFileSync(join(scriptDir, "entry.png"));
   const audit = auditPng(pngOctets);
 
   const crcPassed = audit.chunkNotes.filter(
