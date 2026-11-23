@@ -2,8 +2,11 @@
 // Checks, in order: PNG signature, per-chunk CRC32, IDAT inflate +
 // Adler-32, and the pinned sha256 of entry.png. Exits 0 only when
 // every check passes; prints one verdict line per check otherwise.
+// On PASS, copies entry.png to MAKEFUN_OUTPUT_DIR (or /output) as
+// entry.png so the grader has an image to score; on FAIL writes
+// nothing and exits non-zero.
 
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { createHash } from "node:crypto";
 import { inflateSync } from "node:zlib";
@@ -218,6 +221,12 @@ function main(): number {
     audit.adlerMatches &&
     audit.shaMatches;
   console.log(`RESULT: ${verdictLine(everythingOk)}`);
+  if (everythingOk) {
+    const outputDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
+    mkdirSync(outputDir, { recursive: true });
+    copyFileSync(join(scriptDir, "entry.png"), join(outputDir, "entry.png"));
+    console.log(`wrote ${join(outputDir, "entry.png")}`);
+  }
   return everythingOk ? 0 : 1;
 }
 
